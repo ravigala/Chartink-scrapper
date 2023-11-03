@@ -1,10 +1,15 @@
 const puppeteer = require('puppeteer');
 
 async function initializeBrowser() {
-  return await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox'],
-  });
+  try {
+    return await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox'],
+    });
+  } catch (error) {
+    console.error('Error launching browser:', error);
+    throw error;
+  }
 }
 
 async function fetchData(browser, url) {
@@ -38,6 +43,33 @@ async function fetchData(browser, url) {
   
     await page.close();
     return response;
+  }
+
+  async function waitForData(page) {
+    await page.waitForFunction(() => document.querySelectorAll('#DataTables_Table_0 tr').length >= 1, { timeout: 10000 });
+  }
+  
+  async function getPaginationClassName(page) {
+    return page.evaluate(() => {
+      return document.querySelectorAll('#DataTables_Table_0_next')[0].className;
+    });
+  }
+  
+  async function getResult(page) {
+    return page.evaluate(() => {
+      const rows = document.querySelectorAll('#DataTables_Table_0 tr');
+      return Array.from(rows, (row) => {
+        const columns = row.querySelectorAll('td');
+        return Array.from(columns, (column) => column.innerText);
+      });
+    });
+  }
+  
+  async function goToNextPage(page) {
+    await page.evaluate(() => {
+      const elem = document.querySelectorAll('#DataTables_Table_0_next')[0];
+      elem.click();
+    });
   }
 
 async function closeBrowser(browser) {
