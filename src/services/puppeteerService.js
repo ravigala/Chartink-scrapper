@@ -1,4 +1,3 @@
-// puppeteerService.js
 const puppeteer = require('puppeteer');
 
 async function initializeBrowser() {
