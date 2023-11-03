@@ -1,10 +1,11 @@
-const { fetchData } = require('../services/puppeteerService');
+const { initializeBrowser, fetchData } = require('../services/puppeteerService');
 const { formatData } = require('../services/dataFormatService');
 
 async function fetchChartData(req, res) {
   try {
     const url = req.body.url;
-    const response = await fetchData(url);
+    const browser = await initializeBrowser();
+    const response = await fetchData(browser, url);
 
     if (response.length === 1 && response[0][filteredResponse0] === 'No stocks filtered in the Scan') {
       return res.json({
